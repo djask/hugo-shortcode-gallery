@@ -317,16 +317,27 @@ Ordinal: {{ .Ordinal}}
 					});
 				};
 
-				function createImageDescriptionAsTagListFilter(descTagsList) {
+				function createImageDescriptionAsTagListFilter(descTagsList, descNoTagsList) {
 					return createMetadataFilter(meta => {
 						let imageDescription = meta.ImageDescription;
 						const descAsTags = imageDescription.split(',').map(item => item.trim());
-						return imageDescription !== null && descTagsList.every(
+						/*
+						let descTagsMatch = descTagsList.every(
 							pattern => {
 								const regex = new RegExp(pattern);
 								return descAsTags.some(str => regex.test(str));
 							}
 						);
+						let descNoTagsMatch = !descNoTagsList.some(
+							pattern => {
+								const regex = new RegExp(pattern);
+								return !descAsTags.some(str => regex.test(str));
+							}
+						);
+						*/
+						let descTagsMatch = descTagsList.every(item => descAsTags.includes(item));
+						let descNoTagsMatch = !descNoTagsList.some(item => descAsTags.includes(item));
+						return imageDescription !== null && descTagsMatch && descNoTagsMatch;
 					});
 				};
 
@@ -427,7 +438,7 @@ Ordinal: {{ .Ordinal}}
 					} else if(filterConfig.description){
 						filter = createImageDescriptionFilter(filterConfig.description);
 					} else if(filterConfig.desc_as_tags){
-						filter = createImageDescriptionAsTagListFilter(filterConfig.desc_as_tags);
+						filter = createImageDescriptionAsTagListFilter(filterConfig.desc_as_tags, filterConfig.desc_as_tags_not ?? []);
 					} else {
 						// default to always true filter
 						filter = createMetadataFilter(meta => true);
