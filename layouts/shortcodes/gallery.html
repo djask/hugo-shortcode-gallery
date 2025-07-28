@@ -109,7 +109,6 @@ Ordinal: {{ .Ordinal}}
 			{{ else }}
 				{{ $metadata = $currentPage.Page.Resources.GetMatch ($metaFileName) }}
 			{{ end }}
-
 			{{ if $metadata }}
 				{{ $metadata = $metadata.Content }}
 				{{ $metadata = $metadata | unmarshal }}
@@ -174,7 +173,7 @@ Ordinal: {{ .Ordinal}}
 						width="{{ $thumbnail.Width }}" height="{{ $thumbnail.Height }}"
 
 						{{ if (eq $previewType "blur") }}
-							{{ $preview_b := ($thumbnail.Fit ("32x32 q70 box jpg")) }}
+							{{ $preview_b := ($thumbnail.Fit ("32x32 q100 box jpg")) }}
 							style="filter: blur(25px);"
 							{{ if $embedPreview }}
 								src="data:image/jpeg;base64,{{ $preview_b.Content | base64Encode }}"
@@ -318,6 +317,19 @@ Ordinal: {{ .Ordinal}}
 					});
 				};
 
+				function createImageDescriptionAsTagListFilter(descTagsList) {
+					return createMetadataFilter(meta => {
+						let imageDescription = meta.ImageDescription;
+						const descAsTags = imageDescription.split(',').map(item => item.trim());
+						return imageDescription !== null && descTagsList.every(
+							pattern => {
+								const regex = new RegExp(pattern);
+								return descAsTags.some(str => regex.test(str));
+							}
+						);
+					});
+				};
+
 				// this function returns a function that can be used by justifiedGallery
 				// for filtering images by their star rating
 				function createRatingFilter(min, max) {
@@ -414,6 +426,8 @@ Ordinal: {{ .Ordinal}}
 						filter = createColorLabelFilter(filterConfig.color_label);
 					} else if(filterConfig.description){
 						filter = createImageDescriptionFilter(filterConfig.description);
+					} else if(filterConfig.desc_as_tags){
+						filter = createImageDescriptionAsTagListFilter(filterConfig.desc_as_tags);
 					} else {
 						// default to always true filter
 						filter = createMetadataFilter(meta => true);
