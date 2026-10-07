@@ -8,10 +8,14 @@
 		margins                 gap between images in px (default 5)
 		thumbnailResizeOptions  Hugo image processing spec for the grid thumbnails
 		showExif                true: lightbox caption from EXIF (camera, lens, exposure)
+		description             single-filter shorthand: regex on EXIF ImageDescription
+		desc_as_tags            single-filter shorthand: exact tag in comma-split ImageDescription
 		filterOptions           strict JSON array; per entry: label plus one of
 			description (regex on EXIF ImageDescription), desc_as_tags / desc_as_tags_not
 			(exact tag match on comma-split ImageDescription), tags (regex per tag),
 			rating ("3" | "3-5"), color_label
+		The filter bar renders only when more than one filter is defined; a single
+		filter is applied directly, without UI.
 */}}
 {{ $images := slice }}
 {{ if .Get "match" }}
@@ -29,9 +33,13 @@
 {{ $showExif := .Get "showExif" | default false }}
 {{ $filters := slice }}
 {{ with .Get "filterOptions" }}{{ $filters = . | unmarshal }}{{ end }}
+{{ if not $filters }}
+	{{ with .Get "description" }}{{ $filters = slice (dict "description" .) }}{{ end }}
+	{{ with .Get "desc_as_tags" }}{{ $filters = slice (dict "desc_as_tags" (slice .)) }}{{ end }}
+{{ end }}
 
-<div class="gal-wrap">
-	{{ if $filters }}
+<div class="gal-wrap"{{ if eq (len $filters) 1 }} data-filter="{{ index $filters 0 | jsonify }}"{{ end }}>
+	{{ if gt (len $filters) 1 }}
 		<div class="gal-bar">
 			{{ range $i, $f := $filters }}
 				<button type="button" class="gal-fb{{ if eq $i 0 }} selected{{ end }}" data-filter="{{ $f | jsonify }}">{{ $f.label }}</button>
@@ -127,11 +135,10 @@
 			}
 
 			function init() {
-				var bars = document.querySelectorAll(".gal-bar");
-				[].forEach.call(bars, function (bar) {
-					var gallery = bar.nextElementSibling;
+				[].forEach.call(document.querySelectorAll(".gal-wrap"), function (wrap) {
+					var gallery = wrap.querySelector(".gallery");
+					if (!gallery) return;
 					var links = [].slice.call(gallery.children);
-					var buttons = [].slice.call(bar.querySelectorAll(".gal-fb"));
 
 					function apply(p) {
 						links.forEach(function (a) {
@@ -141,16 +148,22 @@
 						});
 					}
 
-					buttons.forEach(function (b) {
-						b.addEventListener("click", function () {
-							buttons.forEach(function (x) { x.classList.remove("selected"); });
-							b.classList.add("selected");
-							apply(pred(JSON.parse(b.getAttribute("data-filter"))));
+					var bar = wrap.querySelector(".gal-bar");
+					if (bar) {
+						var buttons = [].slice.call(bar.querySelectorAll(".gal-fb"));
+						buttons.forEach(function (b) {
+							b.addEventListener("click", function () {
+								buttons.forEach(function (x) { x.classList.remove("selected"); });
+								b.classList.add("selected");
+								apply(pred(JSON.parse(b.getAttribute("data-filter"))));
+							});
 						});
-					});
-
-					var sel = bar.querySelector(".gal-fb.selected");
-					if (sel) sel.click();
+						var sel = bar.querySelector(".gal-fb.selected");
+						if (sel) sel.click();
+					} else {
+						var single = wrap.getAttribute("data-filter");
+						if (single) apply(pred(JSON.parse(single)));
+					}
 				});
 			}
 
