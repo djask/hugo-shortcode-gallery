@@ -36,9 +36,6 @@
 			{{ range $i, $f := $filters }}
 				<button type="button" class="gal-fb{{ if eq $i 0 }} selected{{ end }}" data-filter="{{ $f | jsonify }}">{{ $f.label }}</button>
 			{{ end }}
-			<button type="button" class="gal-big-btn" title="toggle larger rows" aria-pressed="false">
-				<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M4 10V4h6m10 10v6h-6M4 4l6 6m10 10l-6-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-			</button>
 		</div>
 	{{ end }}
 	<div class="gallery" style="--rowh-base: {{ $rowHeight }}px; --gap: {{ $margins }}px">
@@ -82,10 +79,7 @@
 		.gal-bar { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 10px; }
 		.gal-bar button { font: inherit; cursor: pointer; background: none; border: 1px solid currentColor; color: inherit; padding: 1px 8px; }
 		.gal-bar button.selected { font-weight: 700; box-shadow: inset 0 0 0 1px currentColor; }
-		.gal-bar .gal-big-btn { padding: 1px 6px; display: inline-flex; align-items: center; }
-		.gal-bar .gal-big-btn.on { box-shadow: inset 0 0 0 1px currentColor; }
 		.gallery { display: flex; flex-wrap: wrap; gap: var(--gap); --rowh: var(--rowh-base); }
-		.gal-big .gallery { --rowh: calc(var(--rowh-base) * 1.5); }
 		.gallery > a { display: block; min-width: 0; max-width: 100%; }
 		.gallery > a.gal-off { display: none; }
 		.gallery img { width: 100%; height: auto; display: block; }
@@ -157,12 +151,6 @@
 
 					var sel = bar.querySelector(".gal-fb.selected");
 					if (sel) sel.click();
-
-					var big = bar.querySelector(".gal-big-btn");
-					if (big) big.addEventListener("click", function () {
-						gallery.parentElement.classList.toggle("gal-big");
-						big.classList.toggle("on");
-					});
 				});
 			}
 
@@ -206,7 +194,6 @@
 			document.addEventListener("keydown", function (e) {
 				if (e.key === "Escape") {
 					document.documentElement.classList.remove("gal-open");
-					[].forEach.call(document.querySelectorAll(".gal-big"), function (w) { w.classList.remove("gal-big"); });
 					return;
 				}
 				if (!document.documentElement.classList.contains("gal-open")) return;
