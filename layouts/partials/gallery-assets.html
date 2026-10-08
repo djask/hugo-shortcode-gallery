@@ -14,7 +14,6 @@
 	html.gal-open { overflow: hidden; }
 	html.gal-open .gal-lb { display: block; }
 	.gal-lb img { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 96vw; max-height: 88vh; }
-	.gal-lb .gal-cap { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; color: #fff; font-size: 0.9em; padding: 0 44px; }
 	.gal-lb .gal-cnt { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 0.9em; }
 	.gal-lb button { position: absolute; background: none; border: 0; color: #fff; font-size: 32px; line-height: 1; cursor: pointer; padding: 10px 14px; }
 	.gal-lb .gal-x { top: 2px; right: 2px; font-size: 22px; }
@@ -90,9 +89,9 @@
 		lb.innerHTML = '<button type="button" class="gal-x" aria-label="close">✕</button>' +
 			'<button type="button" class="gal-p" aria-label="previous">‹</button>' +
 			'<button type="button" class="gal-n" aria-label="next">›</button>' +
-			'<div class="gal-cnt"></div><img alt=""><div class="gal-cap"></div>';
+			'<div class="gal-cnt"></div><img alt="">';
 
-		var img = lb.querySelector("img"), cap = lb.querySelector(".gal-cap"), cnt = lb.querySelector(".gal-cnt");
+		var img = lb.querySelector("img"), cnt = lb.querySelector(".gal-cnt");
 		var set = [], cur = 0;
 
 		function show(n) {
@@ -102,8 +101,6 @@
 			img.src = a.getAttribute("href");
 			var t = a.querySelector("img");
 			img.alt = t ? t.alt : "";
-			var d = a.getAttribute("data-description");
-			if (d) cap.innerHTML = d; else cap.textContent = a.getAttribute("title") || "";
 			cnt.textContent = (n + 1) + " / " + set.length;
 		}
 

@@ -7,7 +7,6 @@
 		rowHeight               target row height in px (default 150); rows stretch to fill width
 		margins                 gap between images in px (default 5)
 		thumbnailResizeOptions  Hugo image processing spec for the grid thumbnails
-		showExif                true: lightbox caption from EXIF (camera, lens, exposure)
 		description             single-filter shorthand: regex on EXIF ImageDescription
 		desc_as_tags            single-filter shorthand: exact tag in comma-split ImageDescription
 		filterOptions           strict JSON array; per entry: label plus one of
@@ -30,7 +29,6 @@
 {{ $rowHeight := .Get "rowHeight" | default 150 }}
 {{ $margins := .Get "margins" | default 5 }}
 {{ $thumbnailResizeOptions := .Get "thumbnailResizeOptions" | default "300x150 q85 Lanczos" }}
-{{ $showExif := .Get "showExif" | default false }}
 {{ $filters := slice }}
 {{ with .Get "filterOptions" }}{{ $filters = . | unmarshal }}{{ end }}
 {{ if not $filters }}
@@ -59,16 +57,6 @@
 				{{ $g := printf "%.4f" (div (float $thumb.Width) (float $thumb.Height)) }}
 				<a href="{{ $original.RelPermalink }}"
 					{{ with $meta }}
-						{{ if .Title }}
-							title="{{ .Title }}"
-						{{ else if .ImageDescription }}
-							title="{{ .ImageDescription }}"
-						{{ end }}
-
-						{{ if and $showExif (or .Model .LensModel .FocalLength .FNumber .ExposureTime .ISO) }}
-							data-description="{{ .Model }}{{ if and .Model .LensModel }} + {{ end }}{{ .LensModel }}<br/>{{ if .FocalLength }}{{ .FocalLength }}mm {{ end }}{{ if .FNumber }}f/{{ printf "%.1f" .FNumber.Float64 }} {{ end }}{{ if .ExposureTime }}{{ .ExposureTime }}sec {{ end }} {{ if .ISO }}ISO {{ .ISO }}{{ end }}"
-						{{ end }}
-
 						{{ if $filters }}
 							data-meta="{{ (dict "Tags" .Tags "Rating" .Rating "ColorLabels" .ColorLabels "ImageDescription" .ImageDescription) | jsonify }}"
 						{{ end }}
